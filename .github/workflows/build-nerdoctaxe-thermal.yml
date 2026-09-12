@@ -1,4 +1,4 @@
-name: Build NerdOCTAXE-Gamma Thermal Firmware
+name: Build NerdOCTAXE-Gamma AUTO Thermal Firmware
 
 on:
   workflow_dispatch:
@@ -26,7 +26,7 @@ jobs:
           git checkout --detach FETCH_HEAD
           git submodule update --init --recursive
 
-      - name: Apply thermal governor
+      - name: Apply adaptive AUTO governor
         run: |
           cp scripts/apply_thermal_governor.py upstream/apply_thermal_governor.py
           cd upstream
@@ -36,7 +36,7 @@ jobs:
         working-directory: upstream
         run: |
           COMMIT_HASH=$(git rev-parse --short HEAD)
-          VERSION_TAG="thermal-${COMMIT_HASH}"
+          VERSION_TAG="auto2-${COMMIT_HASH}"
           sed -e "s|__COMMIT__|${COMMIT_HASH}|g" -i ./main/http_server/axe-os/src/app/app.module.ts
           sed -e "s|__VERSION__|${VERSION_TAG}|g" -i ./main/http_server/axe-os/src/app/app.module.ts
           for l in de en es fr it pl ro da zh-CN; do
@@ -69,25 +69,25 @@ jobs:
             0x10000 build/esp-miner.bin \
             0x410000 build/www.bin \
             0xf10000 build/ota_data_initial.bin \
-            -o nerdOCTAXE-Gamma-thermal-factory.bin
+            -o nerdOCTAXE-Gamma-auto-v2-factory.bin
 
       - name: Upload OTA firmware
         uses: actions/upload-artifact@v4
         with:
-          name: nerdOCTAXE-Gamma-thermal-ota
+          name: nerdOCTAXE-Gamma-auto-v2-ota
           path: upstream/esp-miner-NerdOCTAXE-Gamma.bin
           retention-days: 14
 
       - name: Upload matching AxeOS WWW image
         uses: actions/upload-artifact@v4
         with:
-          name: nerdOCTAXE-Gamma-thermal-www
+          name: nerdOCTAXE-Gamma-auto-v2-www
           path: upstream/www.bin
           retention-days: 14
 
       - name: Upload factory firmware
         uses: actions/upload-artifact@v4
         with:
-          name: nerdOCTAXE-Gamma-thermal-factory
-          path: upstream/nerdOCTAXE-Gamma-thermal-factory.bin
+          name: nerdOCTAXE-Gamma-auto-v2-factory
+          path: upstream/nerdOCTAXE-Gamma-auto-v2-factory.bin
           retention-days: 14
