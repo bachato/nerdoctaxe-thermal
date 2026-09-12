@@ -11,13 +11,20 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      UPSTREAM_COMMIT: b4af4e84aa3cb5ab066c9fea77dbc77beb9abcb3
     steps:
       - name: Checkout wrapper repository
         uses: actions/checkout@v4
 
-      - name: Clone upstream firmware
+      - name: Fetch pinned upstream firmware
         run: |
-          git clone --recursive --branch develop https://github.com/shufps/ESP-Miner-NerdQAxePlus.git upstream
+          git init upstream
+          cd upstream
+          git remote add origin https://github.com/shufps/ESP-Miner-NerdQAxePlus.git
+          git fetch --depth 1 origin "${UPSTREAM_COMMIT}"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive
 
       - name: Apply thermal governor
         run: |
@@ -50,9 +57,11 @@ jobs:
           docker run --rm --user root -e BOARD=NERDOCTAXEGAMMA -v $PWD:/home/builder/project \
             shufps/esp-idf-builder:0.0.1 idf.py build
 
-      - name: Merge factory image
+      - name: Prepare OTA and factory images
         working-directory: upstream
         run: |
+          cp build/esp-miner.bin esp-miner-NerdOCTAXE-Gamma.bin
+          cp build/www.bin www.bin
           docker run --rm --user root -v $PWD:/home/builder/project \
             shufps/esp-idf-builder:0.0.1 esptool.py --chip esp32s3 merge_bin --flash_mode dio --flash_size 16MB --flash_freq 80m \
             0x0 build/bootloader/bootloader.bin \
@@ -61,13 +70,19 @@ jobs:
             0x410000 build/www.bin \
             0xf10000 build/ota_data_initial.bin \
             -o nerdOCTAXE-Gamma-thermal-factory.bin
-          cp build/esp-miner.bin nerdOCTAXE-Gamma-thermal-ota.bin
 
       - name: Upload OTA firmware
         uses: actions/upload-artifact@v4
         with:
           name: nerdOCTAXE-Gamma-thermal-ota
-          path: upstream/nerdOCTAXE-Gamma-thermal-ota.bin
+          path: upstream/esp-miner-NerdOCTAXE-Gamma.bin
+          retention-days: 14
+
+      - name: Upload matching AxeOS WWW image
+        uses: actions/upload-artifact@v4
+        with:
+          name: nerdOCTAXE-Gamma-thermal-www
+          path: upstream/www.bin
           retention-days: 14
 
       - name: Upload factory firmware
