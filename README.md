@@ -71,3 +71,11 @@ GitHub Actions fetches the pinned upstream source, applies the base governor, th
 For a normal web update, firmware and WWW are flashed through the two separate manual update fields in AxeOS. The factory image is for recovery/full flashing, not the normal OTA field.
 
 This is experimental custom firmware. Test conservatively and keep the known-good firmware available for rollback.
+
+## Support development
+
+If this firmware is useful to you and you would like to support further development, Bitcoin donations are welcome.
+
+**Bitcoin (on-chain):**
+
+`bc1qehf6evpr6w8wcw0jp5t7z3vtz2wech0u33854p`
