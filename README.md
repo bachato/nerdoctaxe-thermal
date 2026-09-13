@@ -1,34 +1,34 @@
-# NerdOCTAXE-Gamma Adaptive Thermal Governor — AUTO v3
+# NerdOCTAXE-Gamma Adaptive Thermal Governor — AUTO v4
 
 Custom build wrapper for `shufps/ESP-Miner-NerdQAxePlus`, pinned to upstream commit `b4af4e84aa3cb5ab066c9fea77dbc77beb9abcb3`, targeting **NERDOCTAXEGAMMA**.
 
 ## Goal
 
-Keep the miner as fast as practical while automatically reducing ASIC frequency when temperatures rise. Runtime frequency changes do **not** overwrite the frequency saved in AxeOS; the configured value is treated as the maximum ceiling.
+Keep the miner as fast as practical while automatically reducing ASIC frequency when temperatures rise, while avoiding unnecessary frequency hunting around the thermal target. Runtime frequency changes do **not** overwrite the frequency saved in AxeOS; the configured value is treated as the maximum ceiling.
 
 ## AxeOS controls
 
-AUTO v3 adds two persistent settings directly to the AxeOS Mining Settings screen:
+AUTO v4 keeps the two persistent settings in the AxeOS Mining Settings screen:
 
 - **AUTO Thermal Mode** — enable/disable adaptive frequency control.
 - **Target ASIC temperature** — configurable from **60 to 69 C**, default **68 C**.
 
 When AUTO is disabled, the configured AxeOS frequency is used normally, but the hard ASIC/VRM safety caps below remain active.
 
-## AUTO algorithm
+## AUTO v4 algorithm
 
 For a target `T`:
 
-- Above **T + 1 C** for about 6 seconds: reduce frequency by **25 MHz**.
-- At or below **T - 2 C** continuously for about 60 seconds: increase frequency by **25 MHz**, up to the AxeOS configured ceiling.
+- Above **T + 1 C** continuously for about **12 seconds**: reduce frequency by **25 MHz**.
+- At or below **T - 3 C** continuously for about **180 seconds**: increase frequency by **25 MHz**, up to the AxeOS configured ceiling.
 - Inside that band: hold the current runtime frequency.
 - If the user lowers the configured frequency, the lower ceiling takes effect immediately. Raising the configured value only raises the ceiling; AUTO climbs gradually when cool.
 
-At the default target of **68 C**, this corresponds to stepping down above **69 C** and recovering at or below **66 C**.
+At the default target of **68 C**, this means stepping down after about 12 seconds above **69 C** and recovering only after about 3 minutes at or below **65 C**. This wider, asymmetric hysteresis is intended to reduce repeated MHz changes when the miner sits near its thermal equilibrium.
 
 ## ASIC hard safety caps
 
-These remain in force whether AUTO is enabled or disabled:
+These remain in force whether AUTO is enabled or disabled and are unchanged from AUTO v3:
 
 | ASIC temperature | Maximum runtime frequency |
 |---|---:|
@@ -41,7 +41,7 @@ These remain in force whether AUTO is enabled or disabled:
 | >= 80 C | 550 MHz |
 | >= 82 C | 525 MHz |
 
-ASIC hard caps use 2 C recovery hysteresis.
+ASIC hard caps use 2 C recovery hysteresis. When a hard cap lowers runtime frequency while AUTO is enabled, AUTO's internal state is pulled down too, so subsequent recovery remains gradual.
 
 ## VRM hard safety caps
 
@@ -62,11 +62,11 @@ Three consecutive invalid ASIC-temperature readings (about 6 seconds) force the 
 
 ## Build outputs
 
-GitHub Actions fetches the pinned upstream source, applies the AUTO v3 patches, builds only `NERDOCTAXEGAMMA`, and uploads:
+GitHub Actions fetches the pinned upstream source, applies the base governor, the corrected sensor failsafe, and the AUTO v4 anti-hunting tuning, builds only `NERDOCTAXEGAMMA`, and uploads:
 
 - `esp-miner-NerdOCTAXE-Gamma.bin` — firmware OTA image.
 - `www.bin` — matching AxeOS web interface containing the AUTO controls.
-- `nerdOCTAXE-Gamma-auto-v3-factory.bin` — complete factory/recovery image.
+- `nerdOCTAXE-Gamma-auto-v4-factory.bin` — complete factory/recovery image.
 
 For a normal web update, firmware and WWW are flashed through the two separate manual update fields in AxeOS. The factory image is for recovery/full flashing, not the normal OTA field.
 
