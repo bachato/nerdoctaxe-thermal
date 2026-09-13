@@ -31,10 +31,12 @@ jobs:
           cp scripts/apply_thermal_governor.py upstream/apply_thermal_governor.py
           cp scripts/fix_auto_v3_failsafe.py upstream/fix_auto_v3_failsafe.py
           cp scripts/tune_auto_v4.py upstream/tune_auto_v4.py
+          cp scripts/add_runtime_frequency_ui.py upstream/add_runtime_frequency_ui.py
           cd upstream
           python3 apply_thermal_governor.py
           python3 fix_auto_v3_failsafe.py
           python3 tune_auto_v4.py
+          python3 add_runtime_frequency_ui.py
 
       - name: Prepare AxeOS version assets
         working-directory: upstream
