@@ -15,6 +15,11 @@ replacements = [
         "cool threshold",
     ),
     (
+        "if (autoMHz < 0) autoMHz = nerdOctaxeFloorSupported(configuredMHz);",
+        "if (autoMHz < 0) autoMHz = std::min(nerdOctaxeFloorSupported(configuredMHz), 700);",
+        "safe startup ceiling",
+    ),
+    (
         "if (hotPolls >= 3) {",
         "if (hotPolls >= 6) {",
         "hot debounce",
@@ -32,4 +37,4 @@ for old, new, label in replacements:
     src = src.replace(old, new, 1)
 
 path.write_text(src)
-print("AUTO v4 tuned: ~12 s hot debounce, target-3 C recovery threshold, ~180 s cool recovery")
+print("AUTO v4 tuned: safe boot <=700 MHz, ~12 s hot debounce, target-3 C recovery threshold, ~180 s cool recovery")
