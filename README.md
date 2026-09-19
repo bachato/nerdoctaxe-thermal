@@ -1,4 +1,4 @@
-# NerdOCTAXE-Gamma Adaptive Thermal Governor — AUTO v4
+# NerdOCTAXE-Gamma Adaptive Thermal Governor — AUTO v4.1
 
 Custom build wrapper for `shufps/ESP-Miner-NerdQAxePlus`, pinned to upstream commit `b4af4e84aa3cb5ab066c9fea77dbc77beb9abcb3`, targeting **NERDOCTAXEGAMMA**.
 
@@ -8,14 +8,20 @@ Keep the miner as fast as practical while automatically reducing ASIC frequency 
 
 ## AxeOS controls
 
-AUTO v4 keeps the two persistent settings in the AxeOS Mining Settings screen:
+AUTO v4.1 keeps the two persistent settings in the AxeOS Mining Settings screen:
 
 - **AUTO Thermal Mode** — enable/disable adaptive frequency control.
 - **Target ASIC temperature** — configurable from **60 to 69 C**, default **68 C**.
 
 When AUTO is disabled, the configured AxeOS frequency is used normally, but the hard ASIC/VRM safety caps below remain active.
 
-## AUTO v4 algorithm
+## Experimental 900 MHz ceiling
+
+On NerdOCTAXE-Gamma boards where the firmware detects the **TPS53667 6-phase regulator**, AUTO v4.1 extends the selectable frequency table beyond 800 MHz with **825, 850, 875 and 900 MHz**, and raises the absolute frequency ceiling to **900 MHz**.
+
+The legacy **TPS53647 / 4-phase** profile is deliberately left unchanged. No voltage table or automatic voltage increase is added. With AUTO enabled, startup remains capped at **700 MHz** and recovery climbs one **25 MHz** step at a time after the cool dwell period. Frequencies above 800 MHz are experimental and may be unstable depending on silicon, voltage, cooling and power delivery.
+
+## AUTO v4.1 algorithm
 
 For a target `T`:
 
@@ -62,11 +68,11 @@ Three consecutive invalid ASIC-temperature readings (about 6 seconds) force the 
 
 ## Build outputs
 
-GitHub Actions fetches the pinned upstream source, applies the base governor, the corrected sensor failsafe, and the AUTO v4 anti-hunting tuning, builds only `NERDOCTAXEGAMMA`, and uploads:
+GitHub Actions fetches the pinned upstream source, applies the base governor, the corrected sensor failsafe, and the AUTO v4.1 anti-hunting tuning and 900 MHz 6-phase frequency extension, builds only `NERDOCTAXEGAMMA`, and uploads:
 
 - `esp-miner-NerdOCTAXE-Gamma.bin` — firmware OTA image.
 - `www.bin` — matching AxeOS web interface containing the AUTO controls.
-- `nerdOCTAXE-Gamma-auto-v4-factory.bin` — complete factory/recovery image.
+- `nerdOCTAXE-Gamma-auto-v4.1-factory.bin` — complete factory/recovery image.
 
 For a normal web update, firmware and WWW are flashed through the two separate manual update fields in AxeOS. The factory image is for recovery/full flashing, not the normal OTA field.
 

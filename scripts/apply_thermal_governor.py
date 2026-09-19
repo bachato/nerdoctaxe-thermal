@@ -19,6 +19,24 @@ path.write_text(src)
 
 
 # -----------------------------------------------------------------------------
+# Experimental 900 MHz ceiling for NerdOCTAXE-Gamma TPS53667 / 6-phase boards
+# -----------------------------------------------------------------------------
+# Keep the legacy TPS53647 / 4-phase profile untouched. The upstream 6-phase
+# profile already exposes 25 MHz steps through 800 MHz; extend that same table
+# with 825/850/875/900 and raise the absolute validation ceiling to 900 MHz.
+# No voltage values are changed here.
+path = Path("main/boards/nerdoctaxegamma.cpp")
+src = path.read_text()
+freq_anchor = '''        m_asicFrequencies = {525, 550, 575, 600, 625, 650, 675, 700, 725, 750, 775, 800};
+        m_absMaxAsicFrequency = 850; // Absolute max for manual input (danger zone)'''
+freq_replacement = '''        m_asicFrequencies = {525, 550, 575, 600, 625, 650, 675, 700, 725, 750, 775, 800,
+                             825, 850, 875, 900};
+        m_absMaxAsicFrequency = 900; // Experimental AUTO v4.1 ceiling; TPS53667 / 6-phase only'''
+src = replace_once(src, freq_anchor, freq_replacement, "NerdOCTAXE-Gamma 6-phase frequency table")
+path.write_text(src)
+
+
+# -----------------------------------------------------------------------------
 # Runtime governor
 # -----------------------------------------------------------------------------
 path = Path("main/tasks/power_management_task.cpp")
@@ -99,4 +117,4 @@ replacement = '''                <ng-container *ngIf="isNerdOctaxeGamma">\n     
 src = replace_once(src, anchor, replacement, "AxeOS mining controls anchor")
 path.write_text(src)
 
-print("Applied NerdOCTAXE-Gamma AUTO v3 governor, persistent settings and AxeOS controls")
+print("Applied NerdOCTAXE-Gamma AUTO v4.1 governor with TPS53667 900 MHz ceiling, persistent settings and AxeOS controls")

@@ -1,4 +1,4 @@
-name: Build NerdOCTAXE-Gamma AUTO v4 Firmware
+name: Build NerdOCTAXE-Gamma AUTO v4.1 Firmware
 
 on:
   workflow_dispatch:
@@ -26,7 +26,7 @@ jobs:
           git checkout --detach FETCH_HEAD
           git submodule update --init --recursive
 
-      - name: Apply AUTO v4 governor and AxeOS controls
+      - name: Apply AUTO v4.1 governor, 900 MHz extension and AxeOS controls
         run: |
           cp scripts/apply_thermal_governor.py upstream/apply_thermal_governor.py
           cp scripts/fix_auto_v3_failsafe.py upstream/fix_auto_v3_failsafe.py
@@ -42,7 +42,7 @@ jobs:
         working-directory: upstream
         run: |
           COMMIT_HASH=$(git rev-parse --short HEAD)
-          VERSION_TAG="auto4-${COMMIT_HASH}"
+          VERSION_TAG="auto4.1-${COMMIT_HASH}"
           sed -e "s|__COMMIT__|${COMMIT_HASH}|g" -i ./main/http_server/axe-os/src/app/app.module.ts
           sed -e "s|__VERSION__|${VERSION_TAG}|g" -i ./main/http_server/axe-os/src/app/app.module.ts
           for l in de en es fr it pl ro da zh-CN; do
@@ -75,25 +75,25 @@ jobs:
             0x10000 build/esp-miner.bin \
             0x410000 build/www.bin \
             0xf10000 build/ota_data_initial.bin \
-            -o nerdOCTAXE-Gamma-auto-v4-factory.bin
+            -o nerdOCTAXE-Gamma-auto-v4.1-factory.bin
 
       - name: Upload OTA firmware
         uses: actions/upload-artifact@v4
         with:
-          name: nerdOCTAXE-Gamma-auto-v4-ota
+          name: nerdOCTAXE-Gamma-auto-v4.1-ota
           path: upstream/esp-miner-NerdOCTAXE-Gamma.bin
           retention-days: 14
 
       - name: Upload matching AxeOS WWW image
         uses: actions/upload-artifact@v4
         with:
-          name: nerdOCTAXE-Gamma-auto-v4-www
+          name: nerdOCTAXE-Gamma-auto-v4.1-www
           path: upstream/www.bin
           retention-days: 14
 
       - name: Upload factory firmware
         uses: actions/upload-artifact@v4
         with:
-          name: nerdOCTAXE-Gamma-auto-v4-factory
-          path: upstream/nerdOCTAXE-Gamma-auto-v4-factory.bin
+          name: nerdOCTAXE-Gamma-auto-v4.1-factory
+          path: upstream/nerdOCTAXE-Gamma-auto-v4.1-factory.bin
           retention-days: 14
